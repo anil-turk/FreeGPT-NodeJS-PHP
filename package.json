@@ -1,6 +1,6 @@
 {
   "name": "FreeGPT-NodeJS-PHP",
-  "version": "0.1",
+  "version": "1.0.0",
   "description": "Free OpenAI ChatGPT 3.5 NodeJS with using PHP (No login required)",
   "main": "gpt_node.js",
   "repository": {
