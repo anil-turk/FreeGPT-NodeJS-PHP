@@ -5,7 +5,7 @@
   "main": "gpt_node.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Dalufishe/freegpt-js.git"
+    "url": "https://github.com/anil-turk/FreeGPT-NodeJS-PHP.git"
   },
   "scripts": {
     "start": "node --experimental-specifier-resolution=node index.js",
