@@ -9,7 +9,7 @@ const site = ""; // your php site url where you get the prompt data and send the
 // No API key required.
 const wait = 10000;  // wait time in milliseconds for each request
 var useproxy = 0; // 1 for using proxy, 0 for not using proxy
-const userpass = ''; // if you have password directory protection add the username and password here (end with @)
+const userpass = ''; // if you have password directory protection add the username and password here (end with @) format: username:password@
 
 const proxy = {
   get: async () => {
@@ -71,15 +71,16 @@ const extractYouChatToken = (response) => {
 
 const gpt = {
   ask: async (query, pageNumber = 1) => {
+   let browser;
     if(useproxy == 1) {
       const proxies = await proxy.get();
       const randomIndex = Math.floor(Math.random() * proxies.length);
       const randomproxy = proxies[randomIndex];
       const proxyServer = randomproxy['ip'] + ':' + randomproxy['port'];
       console.log(proxyServer);
-      const browser = await puppeteer.launch({args: ['--no-sandbox',`--proxy-server=${proxyServer}`]});
+       browser = await puppeteer.launch({args: ['--no-sandbox',`--proxy-server=${proxyServer}`]});
     }else{
-        const browser = await puppeteer.launch({args: ['--no-sandbox']});
+         browser = await puppeteer.launch({args: ['--no-sandbox']});
     }
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 720 });
