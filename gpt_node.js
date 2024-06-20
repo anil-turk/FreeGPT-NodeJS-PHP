@@ -1,44 +1,41 @@
 
-const axios = require('axios');
-const puppeteer = require('puppeteer-extra');
-const pluginStealth = require('puppeteer-extra-plugin-stealth');
+import axios from 'axios';
 
-puppeteer.use(pluginStealth());
+
+let connect;
+import('puppeteer-real-browser').then(module => {
+    connect = module.connect;
+});
+
 
 const site = ""; // your php site url where you get the prompt data and send the response
 // No API key required.
 const wait = 10000;  // wait time in milliseconds for each request
-var useproxy = 0; // 1 for using proxy, 0 for not using proxy
 const userpass = ''; // if you have password directory protection add the username and password here (end with @) format: username:password@
-
+let useproxy = false; // if you want to use proxy set it to true
 const proxy = {
-  get: async () => {
-    try {
-      const responseForProxy = await axios.get('https://raw.githubusercontent.com/mmpx12/proxy-list/master/proxies.txt');
-      const lines = responseForProxy.data.split("\n");
-      const proxyArray = lines.map(item => {
-        const parts = item.split("://");
-        if (parts.length !== 2) return null; // Skip lines that don't match the expected format
-        const protocol = parts[0];
-        const ipAndPort = parts[1].split(":");
-        if (ipAndPort.length !== 2) return null; // Skip lines with unexpected structure
-        return {
-          protocol: protocol,
-          ip: ipAndPort[0],
-          port: ipAndPort[1]
-        };
-      }).filter(proxy => proxy !== null); // Remove null entries
-      return proxyArray;
-    } catch (error) {
-      console.error("Error fetching proxy list:", error);
-      return []; // or handle error as per your requirement
+    get: async () => {
+        try {
+            const responseForProxy = await axios.get('https://raw.githubusercontent.com/mmpx12/proxy-list/master/proxies.txt');
+            const lines = responseForProxy.data.split("\n");
+            const proxyArray = lines.map(item => {
+                const parts = item.split("://");
+                if (parts.length !== 2) return null; // Skip lines that don't match the expected format
+                const protocol = parts[0];
+                const ipAndPort = parts[1].split(":");
+                if (ipAndPort.length !== 2) return null; // Skip lines with unexpected structure
+                return {
+                    host: ipAndPort[0],
+                    port: ipAndPort[1]
+                };
+            }).filter(proxy => proxy !== null); // Remove null entries
+            return proxyArray;
+        } catch (error) {
+            console.error("Error fetching proxy list:", error);
+            return []; // or handle error as per your requirement
+        }
     }
-  }
 };
-
-
-
-
 const extractYouChatToken = (response) => {
   const tokens = [];
   const eventIndex = response.indexOf("event: youChatToken");
@@ -65,84 +62,64 @@ const extractYouChatToken = (response) => {
   } else {
     console.error("No 'event: youChatToken' found in the response.");
   }
-
   return tokens.join("");
 };
 
 const gpt = {
   ask: async (query, pageNumber = 1) => {
-   let browser;
-    if(useproxy == 1) {
-      const proxies = await proxy.get();
-      const randomIndex = Math.floor(Math.random() * proxies.length);
-      const randomproxy = proxies[randomIndex];
-      const proxyServer = randomproxy['ip'] + ':' + randomproxy['port'];
-      console.log(proxyServer);
-       browser = await puppeteer.launch({args: ['--no-sandbox',`--proxy-server=${proxyServer}`]});
-    }else{
-         browser = await puppeteer.launch({args: ['--no-sandbox']});
-    }
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 720 });
-    //await page.waitForTimeout(3000);
-    await page.setExtraHTTPHeaders({
-      accept: "*/*",
-      "accept-language": "en-US,en;q=0.9",
-      "cache-control": "no-cache",
-      "content-type": "application/json",
-      "oai-language": "en-US",
-      origin: "https://you.com",
-      pragma: "no-cache",
-      referer: "https://you.com",
-      "sec-ch-ua": '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": '"Windows"',
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-    });
-    // Add Cloudflare bypass logic here
-    await page.evaluateOnNewDocument(() => {
-      Object.defineProperty(navigator, 'webdriver', {
-        get: () => false,
-      });
-    });
-    await page.setRequestInterception(true);
-    page.on('request', request => {
-      if (request.isNavigationRequest() && request.redirectChain().length) {
-        request.continue();
-      } else {
-        request.continue({ allowRedirect: true });
+      if (query.trim() === "") {
+          console.error("Cannot parse a blank query.");
+          return null;
       }
-    });
-    const apiUrl = `https://you.com/api/streamingSearch?q=${encodeURIComponent(query)}&page=${pageNumber}&count=10&domain=youchat`;
+   let browser,proxydata;
+      const apiUrl = `https://you.com/api/streamingSearch?q=${encodeURIComponent(query)}&page=${pageNumber}&count=10&domain=youchat`;
+        if(useproxy){
+             proxydata = proxy.get();
+        }else{
+             proxydata = {};
+        }
+     return connect({
+          turnstile: true,
+         proxy: proxydata
+      })
+          .then(async response => {
+              const { page, browser, setTarget } = response
 
-    if (query.trim() === "") {
-      console.error("Cannot parse a blank query.");
-      return null;
-    }
 
-    try {
-      await page.goto(apiUrl, { waitUntil: 'domcontentloaded',timeout: 90000 });
-      //await page.waitFor(3000);
-      const content = await page.content();
-      //console.log(content);
-      await browser.close();
+              await Promise.all([
+                  page.goto(apiUrl, {waitUntil: 'domcontentloaded', timeout: 30000 }), // waits for 5 seconds
+                  page.waitForFunction(
+                      text => document.body.innerHTML.includes(text),
+                      { timeout: 30000 }, // waits for 30 seconds
+                      "event: done"
+                  ),
+              ]);
+              setTarget({ status: false })
 
-      return extractYouChatToken(content);
-    } catch (error) {
-      console.error("Bot failed to fetch response:", error);
-      await browser.close();
-      return null;
-    }
+              try {
+
+                  const content = await page.content();
+                  //console.log(content);
+                  await browser.close();
+                  let returnResponseString = extractYouChatToken(content);
+                  return returnResponseString;
+              } catch (error) {
+                  console.error("Bot failed to fetch response:", error);
+                  //await browser.close();
+                  return null;
+              }
+          })
+
+
+
+
+
   }
 };
 async function main() {
 
   let prompts,matches;
   var langs = [];
-  var divide = 0;
 
   try {
 
@@ -163,7 +140,7 @@ async function main() {
       try {
 
           let response = await gpt.ask(prompts[i]); // bot will respond in few secs
-          console.log(response);
+          //console.log(response);
 
         matches = extractJSONObject(response); // Use match method to find all matches
 
