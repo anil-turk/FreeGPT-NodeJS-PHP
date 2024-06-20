@@ -1,6 +1,6 @@
 # FreeGPT-NodeJS-PHP
 
-This project is a Node.js application that interacts with a PHP site to fetch prompts, send them to a GPT model, and then send the responses back to the PHP site.
+This project is a Node.js application that interacts with a PHP site to fetch prompts, send them to a GPT 3.5 model that provides freely without login, and then send the responses back to the PHP site.
 
 ## Dependencies
 
