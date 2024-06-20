@@ -2,6 +2,9 @@
 
 This project is a Node.js application that interacts with a PHP site to fetch prompts, send them to a GPT 3.5 model that provides freely without login, and then send the responses back to the PHP site.
 
+## Warning
+This project is not affiliated with ChatGPT in any kind. I'm not responsible for anything and this project is just for educational purposes ONLY.
+
 ## Dependencies
 
 This project uses the following dependencies:
