@@ -7,7 +7,7 @@ This project is a Node.js application that interacts with a PHP site to fetch pr
 This project uses the following dependencies:
 
 - axios: "^1.6.8"
-- puppeteer-real-browser(https://github.com/zfcsoftware/puppeteer-real-browser): "^1.2.18"
+- [puppeteer-real-browser](https://github.com/zfcsoftware/puppeteer-real-browser): "^1.2.18"
 
 You can install these dependencies using npm:
 
@@ -40,6 +40,8 @@ node gpt_node.js
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+If you want to use client-side you can visit [this project.](https://github.com/ashishagarwal2023/freegpt.js.org)
 
 ## License
 
