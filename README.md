@@ -4,6 +4,7 @@ This project is a Node.js application that interacts with a PHP site to fetch pr
 
 ## Warning
 This project is not affiliated with ChatGPT in any kind. I'm not responsible for anything and this project is just for educational purposes ONLY.
+If you want to use example.php with sql please do not forget to put mysqli_real_escape_string to inputs for your own safety.
 
 ## Dependencies
 
