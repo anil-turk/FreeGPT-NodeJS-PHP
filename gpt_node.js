@@ -100,13 +100,13 @@ const gpt = {
 
                   const content = await page.content();
                   //console.log(content);
-                  await browser.close();
                   let returnResponseString = extractYouChatToken(content);
                   return returnResponseString;
               } catch (error) {
                   console.error("Bot failed to fetch response:", error);
-                  //await browser.close();
                   return null;
+              }finally {
+                  await browser.close();
               }
           })
 
