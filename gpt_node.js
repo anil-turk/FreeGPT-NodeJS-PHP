@@ -140,8 +140,8 @@ async function main() {
       try {
 
           let response = await gpt.ask(prompts[i]); // bot will respond in few secs
-          //console.log(response);
-
+          console.log(response);
+            //IMPORTANT NOTE: IF you are asking JSON format on the prompt use bottom function to extract JSON object. If you are not use only response variable.
         matches = extractJSONObject(response); // Use match method to find all matches
 
         console.log(matches); // Output the matches
