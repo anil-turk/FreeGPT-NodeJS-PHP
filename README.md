@@ -34,6 +34,12 @@ You can run the script using the following command:
 ```bash
 node gpt_node.js
 ```
+Sometimes puppeteer-real-browser does not close the browsers and it causes a memory leak and high cpu usage. You can use the following .sh or .bat files (depends on your OS) to close the browsers.
+So you can create a cron job or a scheduled task to run this script every 5 minutes.
+- `cpucontrol.sh`: For Linux
+- `cpucontrol.bat`: For Windows
+
+This scripts kills the browsers that are using more than 50%`(You can change the percentage by changing cpuLimit=50 variable)` of the CPU.
 
 ## Functions
 
